@@ -6,6 +6,5 @@ void editEntry();
 void showStored();
 void validateDatabse();
 void help();
-int callback(void *data, int argc, char **argv, char **azColName);
-sqlite3 *connectdb();
-
+void sqlExecute(char *sql, int (*callback)(void*,int,char**,char**));
+int printCallback(void *data, int argc, char **argv, char **azColName);

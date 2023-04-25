@@ -10,8 +10,7 @@ struct entry {
   char password[20];
 };
 
-void help(){
-}
+void help() {}
 
 void cib() {
   while (getchar() != '\n')
@@ -48,9 +47,6 @@ void addEntry() {
   printf("Password: ");
   fgets(newEntry.password, 20, stdin);
   newEntry.password[strcspn(newEntry.password, "\n")] = 0;
-  sqlite3 *db;
-  db = connectdb();
-  char *err;
   char *sql =
       malloc(sizeof(char) * strlen(newEntry.password) *
              strlen(newEntry.username) * strlen(newEntry.platform) * 50);
@@ -59,54 +55,48 @@ void addEntry() {
              strlen(newEntry.platform) * 50);
   sprintf(sql, "INSERT INTO main VALUES('%s','%s','%s')", newEntry.platform,
           newEntry.username, newEntry.password);
-  int rc = sqlite3_exec(db, sql, NULL, NULL, &err);
-  if (rc != SQLITE_OK) {
-    printf("Error: %s\n", err);
-    exit(1);
-  } else {
-    printf("Entry added successfully.\n");
-  }
+  sqlExecute(sql, NULL);
 }
+
+
 void editEntry() {}
+
+
 void showStored() {
-  sqlite3 *db;
-  db = connectdb();
-  char *err;
   char *sql = "SELECT * FROM main";
-  int rc = sqlite3_exec(db, sql, callback, NULL, &err);
-  if (rc != SQLITE_OK) {
-    printf("Error: %s\n", err);
-    exit(1);
-  }
+  sqlExecute(sql, printCallback);
 }
-sqlite3 *connectdb() {
+
+
+void sqlExecute(char *sql, int (*callback)(void *, int, char **, char **)){
   sqlite3 *db;
+  char *err_msg;
   int rc = sqlite3_open("passwords.db", &db);
   if (rc != SQLITE_OK) {
     printf("Connection to db failed.\nError: %s\n", sqlite3_errmsg(db));
+    sqlite3_close(db);
     exit(1);
   }
-  return db;
+  rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
+  if (rc!=SQLITE_OK) {
+    printf("Error: %s",err_msg);
+    sqlite3_free(err_msg);
+    sqlite3_close(db);
+  }
 }
 
 void validateDatabse() {
-  sqlite3 *db;
-  db = connectdb();
-  char *err;
   char *sql = "CREATE TABLE IF NOT EXISTS main(platform TEXT, username TEXT, "
               "password TEXT)";
-  int rc = sqlite3_exec(db, sql, NULL, NULL, &err);
-  if (rc != SQLITE_OK) {
-    printf("Error: %s\n", err);
-    exit(1);
-  }
+  sqlExecute(sql, NULL);
 }
-int callback(void *data, int argc, char **argv, char **azColName) {
+
+
+int printCallback(void *data, int argc, char **argv, char **azColName) {
   int i;
   for (i = 0; i < argc; i++) {
-    printf("%s : %s", azColName[i], argv[i] ? argv[i] : "NULL");
+    printf("%s : %s | ", azColName[i], argv[i] ? argv[i] : "NULL");
   }
   printf("\n");
   return 0;
 }
-
