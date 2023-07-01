@@ -37,6 +37,7 @@ void showMenu() {
 }
 
 void addEntry() {
+  system("clear");
   struct entry newEntry;
   printf("Platform: ");
   fgets(newEntry.platform, 20, stdin);
@@ -59,6 +60,7 @@ void addEntry() {
 }
 
 void searchBy(char *searchField){
+      system("clear");
       char searchChoice[20];
       printf("Enter %s: ", searchField);
       fgets(searchChoice, 20, stdin);
@@ -66,13 +68,65 @@ void searchBy(char *searchField){
       char *sql = malloc(sizeof(char) * 60 * 50);
       memset(sql, 0, sizeof(char) * 60 * 50);
       sprintf(sql, "SELECT * FROM main WHERE %s='%s'", searchField, searchChoice);
+      system("clear");
+      printAllFields();
       sqlExecute(sql, printCallback);
 }
 
-void editEntry() {}
+void editEntry() {
+  system("clear");
+  int choice;
+  printf("1. Search by platform\n2. Search by username\n3. Search by password\n");
+  printf("Choice(1-3): ");
+  scanf("%d", &choice);
+  cib();
+  system("clear");
+  switch (choice) {
+  case 1:
+    searchBy("platform");
+    break;
+  case 2:
+    searchBy("username");
+    break;
+  case 3:
+    searchBy("password");
+    break;
+  }
+  printf("Enter id to edit: ");
+  int id;
+  scanf("%d", &id);
+  cib();
+  system("clear");
+  printf("1. Edit platform\n2. Edit username\n3. Edit password\n");
+  printf("Choice(1-3): ");
+  scanf("%d", &choice);
+  cib();
+  system("clear");
+  char *field;
+  switch (choice) {
+  case 1:
+    field = "platform";
+    break;
+  case 2:
+    field = "username";
+    break;
+  case 3:
+    field = "password";
+    break;
+  }
+  char newValue[20];
+  printf("Enter new %s: ", field);
+  fgets(newValue, 20, stdin);
+  newValue[strcspn(newValue, "\n")] = 0;
+  char *sql = malloc(sizeof(char) * 60 * 50);
+  memset(sql, 0, sizeof(char) * 60 * 50);
+  sprintf(sql, "UPDATE main SET %s='%s' WHERE id=%d", field, newValue, id);
+  sqlExecute(sql, NULL);
+}
 
 
 void showStored() {
+  system("clear");
   char *sql = "SELECT * FROM main";
   printAllFields();
   sqlExecute(sql, printCallback);
