@@ -29,16 +29,8 @@ int main(int argc, char *argv[]) {
         printf("%s is not a searchby option.\n", argv[2]);
         exit(1);
       }
-      char searchby[20];
-      printf("Enter %s: ", argv[2]);
-      fgets(searchby, 20, stdin);
-      searchby[strcspn(searchby, "\n")] = 0;
-      char *sql = malloc(sizeof(char) * 60 * 50);
-      memset(sql, 0, sizeof(char) * 60 * 50);
-      sprintf(sql, "SELECT * FROM main WHERE %s='%s'", argv[2], searchby);
-      printf("%s\n", sql);
-      sqlExecute(sql, printCallback);
-    }
+      searchBy(argv[2]);
+          }
   }
   return 0;
 }

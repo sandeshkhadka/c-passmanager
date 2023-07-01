@@ -53,17 +53,28 @@ void addEntry() {
   memset(sql, 0,
          sizeof(char) * strlen(newEntry.password) * strlen(newEntry.username) *
              strlen(newEntry.platform) * 50);
-  sprintf(sql, "INSERT INTO main VALUES('%s','%s','%s')", newEntry.platform,
+  sprintf(sql, "INSERT INTO main (platform,username,password) VALUES('%s','%s','%s')", newEntry.platform,
           newEntry.username, newEntry.password);
   sqlExecute(sql, NULL);
 }
 
+void searchBy(char *searchField){
+      char searchChoice[20];
+      printf("Enter %s: ", searchField);
+      fgets(searchChoice, 20, stdin);
+      searchChoice[strcspn(searchChoice, "\n")] = 0;
+      char *sql = malloc(sizeof(char) * 60 * 50);
+      memset(sql, 0, sizeof(char) * 60 * 50);
+      sprintf(sql, "SELECT * FROM main WHERE %s='%s'", searchField, searchChoice);
+      sqlExecute(sql, printCallback);
+}
 
 void editEntry() {}
 
 
 void showStored() {
   char *sql = "SELECT * FROM main";
+  printAllFields();
   sqlExecute(sql, printCallback);
 }
 
@@ -86,17 +97,33 @@ void sqlExecute(char *sql, int (*callback)(void *, int, char **, char **)){
 }
 
 void validateDatabse() {
-  char *sql = "CREATE TABLE IF NOT EXISTS main(platform TEXT, username TEXT, "
-              "password TEXT)";
-  sqlExecute(sql, NULL);
+  char *sql = "CREATE TABLE IF NOT EXISTS main ("
+    "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+    "password TEXT,"
+    "username TEXT,"
+    "platform TEXT)";
+    sqlExecute(sql, NULL);
 }
 
 
 int printCallback(void *data, int argc, char **argv, char **azColName) {
   int i;
   for (i = 0; i < argc; i++) {
-    printf("%s : %s | ", azColName[i], argv[i] ? argv[i] : "NULL");
+    printf("|\t");
+    printf("%s ", argv[i] ? argv[i] : "NULL");
+    printf("\t|");
   }
   printf("\n");
   return 0;
+}
+int printFieldsCallback(void *data, int argc, char **argv, char **azColName) {
+  printf("|\t");
+  printf("%s ", argv[1] ? argv[1] : "NULL");
+  printf("\t|");
+  return 0;
+}
+void printAllFields(){
+  char *sql = "PRAGMA table_info(main)";
+  sqlExecute(sql, printFieldsCallback);
+  printf("\n");
 }
