@@ -19,8 +19,8 @@ void cib() {
 void showMenu() {
   int choice;
   printf("\n1. Add new password\n2. Edit existing password\n3. Show stored "
-         "password\n");
-  printf("Choice(1-3): ");
+         "password\n4.Delete password\n");
+  printf("Choice(1-4): ");
   scanf("%d", &choice);
   switch (choice) {
   case 1:
@@ -32,6 +32,9 @@ void showMenu() {
     break;
   case 3:
     showStored();
+    break;
+  case 4:
+    deleteEntry();
     break;
   }
 }
@@ -72,9 +75,7 @@ void searchBy(char *searchField){
       printAllFields();
       sqlExecute(sql, printCallback);
 }
-
-void editEntry() {
-  system("clear");
+int findId(){
   int choice;
   printf("1. Search by platform\n2. Search by username\n3. Search by password\n");
   printf("Choice(1-3): ");
@@ -92,11 +93,16 @@ void editEntry() {
     searchBy("password");
     break;
   }
-  printf("Enter id to edit: ");
+  printf("Enter id : ");
   int id;
   scanf("%d", &id);
   cib();
+  return id; 
+}
+void editEntry() {
   system("clear");
+  int id = findId();
+  int choice;
   printf("1. Edit platform\n2. Edit username\n3. Edit password\n");
   printf("Choice(1-3): ");
   scanf("%d", &choice);
@@ -123,7 +129,14 @@ void editEntry() {
   sprintf(sql, "UPDATE main SET %s='%s' WHERE id=%d", field, newValue, id);
   sqlExecute(sql, NULL);
 }
-
+void deleteEntry() {
+  system("clear");
+  int id = findId();
+  char *sql = malloc(sizeof(char) * 60 * 50);
+  memset(sql, 0, sizeof(char) * 60 * 50);
+  sprintf(sql, "DELETE FROM main WHERE id=%d", id);
+  sqlExecute(sql, NULL);
+}
 
 void showStored() {
   system("clear");

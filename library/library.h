@@ -5,6 +5,7 @@ void showMenu();
 void editEntry();
 void showStored();
 void validateDatabse();
+void deleteEntry();
 void help();
 void sqlExecute(char *sql, int (*callback)(void*,int,char**,char**));
 void searchBy(char *searchField);
