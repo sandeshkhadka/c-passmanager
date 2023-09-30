@@ -11,10 +11,29 @@ struct entry {
   char username[MAX_PAINTEXT_LEN];
   char password[MAX_PAINTEXT_LEN];
 };
-unsigned char key[crypto_secretbox_KEYBYTES] = "mysecretkey";
-unsigned char nonce[crypto_secretbox_NONCEBYTES] = "mysecretnonce";
-void help() {}
+unsigned char key[crypto_secretbox_KEYBYTES];
+unsigned char nonce[crypto_secretbox_NONCEBYTES];
+static const unsigned char salt[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+                                     0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C,
+                                     0x0D, 0x0E, 0x0F, 0x10};
 
+void deriveKeyAndNonce(const char *password) {
+  // Derive a key from the password and the fixed salt
+  if (crypto_pwhash(key, sizeof(key), password, strlen(password), salt,
+                    crypto_pwhash_OPSLIMIT_INTERACTIVE,
+                    crypto_pwhash_MEMLIMIT_INTERACTIVE,
+                    crypto_pwhash_ALG_DEFAULT) != 0) {
+    printf("Error while deriving key\n");
+  }
+
+  // Generate a nonce using the same fixed salt
+  if (crypto_pwhash(nonce, sizeof(nonce), password, strlen(password), salt,
+                    crypto_pwhash_OPSLIMIT_INTERACTIVE,
+                    crypto_pwhash_MEMLIMIT_INTERACTIVE,
+                    crypto_pwhash_ALG_DEFAULT) != 0) {
+    printf("Error while deriving nonce\n");
+  }
+}
 void cib() {
   while (getchar() != '\n')
     ; // clear the input buffer
@@ -222,14 +241,17 @@ int verifyPassword(void *password, int colCount, char **data, char **columns) {
   if (crypto_pwhash_str_verify(data[0], password, strlen(password)) != 0) {
     printf("Wrong Password!\n");
     exit(1);
+  } else {
+    deriveKeyAndNonce(password);
   }
   return 0;
 }
 int autheticateUser() {
   char *sql = "SELECT * FROM auth";
-  char inputPassword[20];
+  unsigned char inputPassword[crypto_secretbox_KEYBYTES];
   printf("Enter Password: ");
   scanf("%s", inputPassword);
+
   sqlExecute(sql, verifyPassword, createMasterPassowrd, inputPassword);
   return 0;
 }

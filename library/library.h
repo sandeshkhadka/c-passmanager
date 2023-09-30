@@ -16,3 +16,4 @@ int printFieldsCallback(void *data, int argc, char **argv, char **azColName);
 int verifyUser();
 int autheticateUser();
 void printHelp();
+void cib();

@@ -17,6 +17,7 @@ int main(int argc, char *argv[]) {
     if (strcmp(argv[1], "menu") == 0) {
       showMenu();
     } else if (strcmp(argv[1], "addnew") == 0) {
+      cib();
       addEntry();
     } else if (strcmp(argv[1], "all") == 0) {
       showStored();
